@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Infinite State Meditation Recommendations",
+    "version": "0.1.0",
+    "description": "Recommend one user-approved free meditation for STRESS, SLEEP, or FOCUS. This is a REST interface prepared for onboarding, not a verified Muse-specific protocol."
+  },
+  "paths": {
+    "/recommendations": {
+      "post": {
+        "operationId": "recommendMeditation",
+        "summary": "Recommend a meditation for the user's desired outcome",
+        "description": "Pass the full user request, including desired outcome, next activity, time, duration, and content preference when stated. Returns exactly one primary goal and its selected meditation. Confidence is a heuristic score. Requested duration is metadata; the MVP session length is fixed. URLs include Muse UTM attribution.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": { "type": "string", "minLength": 1, "maxLength": 4000, "example": "My mind is racing and I need to sleep." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Normalized intent and approved meditation",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Recommendation" } } }
+          },
+          "400": { "description": "Invalid JSON or text" },
+          "413": { "description": "Body exceeds 16384 bytes" },
+          "415": { "description": "Content type must be application/json" },
+          "500": { "description": "Unable to recommend a meditation" }
+        }
+      }
+    },
+    "/health": {
+      "get": { "operationId": "health", "responses": { "200": { "description": "Service is running" } } }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Goal": { "type": "string", "enum": ["STRESS", "SLEEP", "FOCUS"] },
+      "Recommendation": {
+        "type": "object",
+        "required": ["primary_goal", "confidence", "reasoning_summary", "detected_intents", "duration_if_present", "time_context_if_present", "content_preference_if_present", "recommendation"],
+        "properties": {
+          "primary_goal": { "$ref": "#/components/schemas/Goal" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "reasoning_summary": { "type": "string" },
+          "detected_intents": { "type": "array", "items": { "type": "string" } },
+          "duration_if_present": {
+            "type": "object", "nullable": true,
+            "required": ["value", "unit"],
+            "properties": { "value": { "type": "integer" }, "unit": { "type": "string", "enum": ["minutes", "hours"] } }
+          },
+          "time_context_if_present": { "type": "string", "nullable": true },
+          "content_preference_if_present": { "type": "string", "nullable": true },
+          "recommendation": {
+            "type": "object",
+            "required": ["goal", "title", "url", "duration", "is_premium", "source"],
+            "properties": {
+              "goal": { "$ref": "#/components/schemas/Goal" },
+              "title": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "duration": { "type": "string" },
+              "is_premium": { "type": "boolean", "enum": [false] },
+              "source": { "type": "string", "enum": ["user_confirmed_infinite_state"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
