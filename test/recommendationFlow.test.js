@@ -58,7 +58,7 @@ describe("recommendation flow", () => {
 
     const result = recommendMeditation("I need to sleep", {
       catalog,
-      attribution: { partner: "muse_test" }
+      attribution: { utm_source: "muse", partner: "muse_test" }
     });
 
     const url = new URL(result.recommendation.url);
@@ -99,7 +99,8 @@ describe("recommendation flow", () => {
 
     for (const testCase of cases) {
       const result = recommendMeditation(testCase.input, {
-        catalog: INFINITE_STATE_MVP_SESSION_CATALOG
+        catalog: INFINITE_STATE_MVP_SESSION_CATALOG,
+        attribution: { utm_source: "muse" }
       });
       const url = new URL(result.recommendation.url);
 

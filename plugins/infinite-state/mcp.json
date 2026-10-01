@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "infinite-state": {
+      "type": "streamable-http",
+      "url": "https://infinite-state-muse.onrender.com/mcp"
+    }
+  }
+}

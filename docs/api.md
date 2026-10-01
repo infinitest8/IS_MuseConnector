@@ -16,7 +16,7 @@ The JSON response includes primary_goal (STRESS, SLEEP, or FOCUS), confidence,
 reasoning_summary, detected_intents, duration_if_present, time_context_if_present,
 content_preference_if_present, and recommendation.
 
-recommendation contains goal, title, url, duration, is_premium, and source.
+recommendation contains goal, title, description, url, duration, is_premium, and source.
 Its URL opens the user-approved Infinite State session with these parameters:
 utm_source=muse, utm_medium=connector, utm_campaign=infinite_state_meditations.
 
@@ -47,8 +47,23 @@ request; ask "Are you trying to calm down, fall asleep, or focus?" when useful.
 GET /health returns {"status":"ok"}.
 GET /openapi.json returns the OpenAPI 3.0.3 specification.
 
+## ChatGPT MCP
+
+Connect to https://infinite-state-muse.onrender.com/mcp with Streamable HTTP.
+Tool: recommend_session. Required input: user_context (1-4000 characters).
+Optional: desired_outcome (STRESS/SLEEP/FOCUS, explicitly stated by the user),
+desired_duration (positive minutes, at most 1440), content_preference (1-200
+characters). Outputs include primary_goal, title, description, duration, reason,
+url, is_premium, confidence, requested_duration_minutes, content_preference,
+and clarification_question. No authentication is required.
+
+Both transports use the same classifier and the same three selected sessions.
+ChatGPT links use utm_source=chatgpt and utm_medium=plugin with the same campaign.
+These are analytics parameters, not a verified platform referral contract.
+
 ## Hosting
 
-A Render Free instance can sleep after inactivity, delaying the next request.
-This deployment is suitable for initial review/testing; live Muse availability
-and authentication requirements must be confirmed during review.
+Both endpoints use the existing paid Render web service (0.5 CPU, 512 MB).
+It does not use free-tier idle sleeping. Deployments, outages, network latency,
+and platform tool selection can still affect response time. API/MCP tests are
+not a substitute for actual Muse or ChatGPT integration tests and approval.

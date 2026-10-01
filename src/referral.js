@@ -3,7 +3,7 @@ export function addReferralAttribution(url, attribution = {}) {
 
   const parsedUrl = new URL(url);
   const params = {
-    utm_source: "muse",
+    utm_source: "infinite_state",
     utm_medium: "connector",
     utm_campaign: "infinite_state_meditations",
     ...attribution

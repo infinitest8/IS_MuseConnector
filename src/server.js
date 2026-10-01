@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
-import { recommendMeditation } from "./recommendationFlow.js";
-import { INFINITE_STATE_MVP_SESSION_CATALOG } from "./productionCatalog.js";
+import { recommendForMuse } from "./platformAdapters.js";
+import { handleMcpRequest } from "./mcpServer.js";
 
 const MAX_BODY_BYTES = 16_384;
 
@@ -18,6 +18,15 @@ export function createRecommendationServer() {
   return createServer(async (request, response) => {
     try {
       const path = new URL(request.url, "http://localhost").pathname;
+      if (path === "/.well-known/openai-apps-challenge" && request.method === "GET") {
+        const token = process.env.OPENAI_APPS_CHALLENGE;
+        if (!token) return send(response, 404, { error: "Verification token not configured" });
+        response.writeHead(200, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        return response.end(token);
+      }
+      if (path === "/mcp" && request.method !== "POST") {
+        return await handleMcpRequest(request, response);
+      }
       if (path === "/health" && request.method === "GET") {
         return send(response, 200, { status: "ok" });
       }
@@ -37,7 +46,7 @@ export function createRecommendationServer() {
         const document = JSON.parse(await readFile(new URL("../openapi.json", import.meta.url), "utf8"));
         return send(response, 200, document);
       }
-      if (path !== "/recommendations") return send(response, 404, { error: "Not found" });
+      if (path !== "/recommendations" && path !== "/mcp") return send(response, 404, { error: "Not found" });
       if (request.method !== "POST") {
         response.setHeader("Allow", "POST");
         return send(response, 405, { error: "Use POST for recommendations" });
@@ -58,12 +67,11 @@ export function createRecommendationServer() {
       } catch {
         return send(response, 400, { error: "Invalid JSON" });
       }
+      if (path === "/mcp") return await handleMcpRequest(request, response, body);
       if (!body || typeof body.text !== "string" || !body.text.trim() || body.text.length > 4000) {
         return send(response, 400, { error: "text must be a nonempty string of at most 4000 characters" });
       }
-      return send(response, 200, recommendMeditation(body.text, {
-        catalog: INFINITE_STATE_MVP_SESSION_CATALOG
-      }));
+      return send(response, 200, recommendForMuse(body.text));
     } catch {
       if (!response.headersSent) send(response, 500, { error: "Unable to recommend a meditation" });
     }

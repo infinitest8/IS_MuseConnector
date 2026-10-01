@@ -36,6 +36,7 @@ export function createProductionCatalog(sessionsByGoal) {
     catalog[goal] = {
       goal,
       title: session.title.trim(),
+      description: session.description,
       url: session.url.trim(),
       duration: session.duration,
       is_premium: Boolean(session.is_premium),
