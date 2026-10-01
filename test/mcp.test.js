@@ -43,6 +43,8 @@ test("MCP SDK client initializes, discovers and calls the recommendation tool", 
     assert.equal(tools[0].name, "recommend_session");
     assert.equal(tools[0].annotations.readOnlyHint, true);
     assert.equal(tools[0].annotations.openWorldHint, false);
+    assert.equal(tools[0].inputSchema.properties.user_context.maxLength, 1000);
+    assert.match(tools[0].inputSchema.properties.user_context.description, /brief, task-specific/);
     for (const [user_context, goal] of [
       ["I am overwhelmed and have ten minutes before a meeting.", "STRESS"],
       ["I have been lying here for an hour and cannot sleep.", "SLEEP"],
@@ -55,7 +57,7 @@ test("MCP SDK client initializes, discovers and calls the recommendation tool", 
       assert.ok(result.structuredContent.description);
       assert.deepEqual(JSON.parse(result.content[0].text), result.structuredContent);
     }
-    for (const args of [{ user_context: " " }, { user_context: "sleep", desired_outcome: "ENERGY" },
+    for (const args of [{ user_context: " " }, { user_context: "x".repeat(1001) }, { user_context: "sleep", desired_outcome: "ENERGY" },
       { user_context: "focus", desired_duration: -1 }]) {
       const result = await client.callTool({ name: "recommend_session", arguments: args });
       assert.equal(result.isError, true);

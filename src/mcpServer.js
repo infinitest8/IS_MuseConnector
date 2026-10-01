@@ -5,13 +5,13 @@ import { recommendForChatGPT } from "./platformAdapters.js";
 
 export function createSessionMcpServer() {
   const server = new McpServer({ name: "infinite-state", version: "0.2.0" }, {
-    instructions: "Recommend only Infinite State's three selected free sessions. Pass full user context. Set desired_outcome only when explicitly stated by the user. Session durations are fixed; do not promise an exact requested length. Use concise reasons. No medical diagnosis, treatment, payments, or account actions."
+    instructions: "Recommend only Infinite State's three selected free sessions. Send only a brief summary of the user's immediate meditation goal and relevant next activity. Never send conversation history, chat transcripts, memories, medical records, or unrelated personal information. Set desired_outcome only when explicitly stated by the user. Session durations are fixed; do not promise an exact requested length. Use concise reasons. No medical diagnosis, treatment, payments, or account actions."
   });
   server.registerTool("recommend_session", {
     title: "Recommend an Infinite State session",
-    description: "Use when the user wants an Infinite State session to calm down, sleep, or concentrate. Interpret the full context and next activity. Returns one selected free session with its actual duration and a direct web link. Does not play audio, change accounts, diagnose conditions, or process payments. Ask the returned clarification question when intent is unclear.",
+    description: "Recommend one selected Infinite State meditation for calming down, sleep, or concentration, using only a brief statement of the user's immediate goal and relevant next activity. Do not send conversation history, transcripts, memories, medical records, or unrelated personal information. Returns the session's actual duration and a direct listening link. Does not play audio, change accounts, diagnose conditions, or process payments. Ask the returned clarification question when intent is unclear.",
     inputSchema: {
-      user_context: z.string().trim().min(1).max(4000).describe("The user's full request, including desired outcome and next activity."),
+      user_context: z.string().trim().min(1).max(1000).describe("A brief, task-specific statement of the immediate meditation goal and relevant next activity. Exclude conversation history, transcripts, memories, medical records, and unrelated personal details."),
       desired_outcome: z.enum(["STRESS", "SLEEP", "FOCUS"]).optional().describe("Only supply when the user explicitly states this desired outcome; it takes precedence over context."),
       desired_duration: z.number().positive().max(1440).optional().describe("Requested minutes, if stated. Selected session lengths are fixed."),
       content_preference: z.string().trim().min(1).max(200).optional().describe("The user's stated preference, if any; the three available sessions use binaural beats.")
