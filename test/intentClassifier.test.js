@@ -9,6 +9,7 @@ describe("classifyIntent", () => {
     ["My mind is racing and I need to sleep.", PRIMARY_GOALS.SLEEP],
     ["My mind is racing but I have to finish this report.", PRIMARY_GOALS.FOCUS],
     ["I'm mentally exhausted and need to unwind.", PRIMARY_GOALS.STRESS],
+    ["I'm mentally exhausted and need to get some work done.", PRIMARY_GOALS.FOCUS],
     ["I'm mentally exhausted but need to work for another hour.", PRIMARY_GOALS.FOCUS],
     ["I'm tired and want to take a nap.", PRIMARY_GOALS.SLEEP],
     ["I'm tired and need to stay focused for a meeting.", PRIMARY_GOALS.FOCUS],

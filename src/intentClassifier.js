@@ -20,7 +20,7 @@ const OUTCOME_PATTERNS = [
     weight: 8,
     patterns: [
       /\b(need to|have to|want to|trying to|help me)\s+(focus|concentrate|study|work|finish|write|read|code|start|lock in)\b/i,
-      /\b(get work done|be productive|stay on task|pay attention|block distractions|get in the zone|flow state)\b/i,
+      /\b(get (some )?work done|be productive|stay on task|pay attention|block distractions|get in the zone|flow state)\b/i,
       /\b(deep work|work session|study(ing)?|exam prep|meeting prep|presentation prep|deadline|report)\b/i,
       /\b(focus|study|concentration|productivity)\s+(music|session)\b/i,
       /\b(stay awake|work for another|focus for)\b/i

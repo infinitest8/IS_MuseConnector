@@ -62,7 +62,10 @@ Suggested submission description:
 
 > Infinite State recommends one free meditation for stress relief, sleep, or focus based on the user's desired outcome, then provides a direct link to the selected session.
 
-Remaining steps: sign in to Muse onboarding, confirm its integration requirements, choose hosting, deploy over HTTPS, and test inside Muse. The existing UTM parameters are analytics attribution, not a verified Muse referral contract. Browser playback and live Muse integration remain unverified.
+Remaining steps: submit the prepared Muse application after reviewing its terms,
+and test inside Muse when access is available. The existing UTM parameters are
+analytics attribution, not a verified Muse referral contract. Browser playback
+and live Muse integration remain unverified.
 
 ## Render Deployment
 
@@ -77,3 +80,14 @@ configured. The deployment URL must be taken from Render after deployment.
 Use the deployed base URL for Muse's API URL, `/openapi.json` for its OpenAPI
 specification, and `/docs` for documentation. POST requests go to
 `/recommendations`. The web service uses only the three confirmed sessions.
+
+Live deployment:
+
+- API base: https://infinite-state-muse.onrender.com
+- OpenAPI: https://infinite-state-muse.onrender.com/openapi.json
+- Documentation: https://infinite-state-muse.onrender.com/docs
+- Repository: https://github.com/infinitest8/IS_MuseConnector
+- Render service: https://dashboard.render.com/web/srv-dausau8jo6nc73edbsog
+
+Deployed to Render Free on 2026-09-30. HTTPS checks verified health,
+documentation, OpenAPI, and each goal's approved session with Muse attribution.
