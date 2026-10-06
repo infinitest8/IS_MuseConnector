@@ -3,12 +3,18 @@ import { test } from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createRecommendationServer } from "../src/server.js";
-import { recommendForMuse, recommendForChatGPT } from "../src/platformAdapters.js";
+import { recommendForMuse, recommendForChatGPT, recommendForClaude } from "../src/platformAdapters.js";
 
 test("Muse and ChatGPT share session selection with separate attribution", () => {
   for (const user_context of ["Help me calm down", "Help me sleep", "I need to focus"]) {
     const muse = recommendForMuse(user_context);
     const chatgpt = recommendForChatGPT({ user_context });
+    const claude = recommendForClaude({ user_context });
+    assert.equal(claude.primary_goal, chatgpt.primary_goal);
+    assert.equal(claude.title, chatgpt.title);
+    assert.equal(new URL(claude.url).pathname, new URL(chatgpt.url).pathname);
+    assert.equal(new URL(claude.url).searchParams.get("utm_source"), "claude");
+    assert.equal(new URL(claude.url).searchParams.get("utm_medium"), "connector");
     assert.equal(chatgpt.primary_goal, muse.primary_goal);
     assert.equal(chatgpt.title, muse.recommendation.title);
     assert.equal(new URL(chatgpt.url).pathname, new URL(muse.recommendation.url).pathname);
@@ -41,6 +47,7 @@ test("MCP SDK client initializes, discovers and calls the recommendation tool", 
     const { tools } = await client.listTools();
     assert.equal(tools.length, 1);
     assert.equal(tools[0].name, "recommend_session");
+    assert.equal(tools[0].annotations.title, "Recommend an Infinite State session");
     assert.equal(tools[0].annotations.readOnlyHint, true);
     assert.equal(tools[0].annotations.openWorldHint, false);
     assert.equal(tools[0].inputSchema.properties.user_context.maxLength, 1000);
@@ -63,6 +70,29 @@ test("MCP SDK client initializes, discovers and calls the recommendation tool", 
       assert.equal(result.isError, true);
     }
     assert.equal((await fetch(`${base}/.well-known/openai-apps-challenge`)).status, 404);
+  } finally {
+    await client.close();
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("Claude MCP route returns shared sessions with Claude attribution", async () => {
+  const server = createRecommendationServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const client = new Client({ name: "claude-review-tests", version: "1.0.0" });
+  try {
+    await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${server.address().port}/mcp/claude`)));
+    const { tools } = await client.listTools();
+    assert.equal(tools[0].annotations.title, "Recommend an Infinite State session");
+    for (const [user_context, goal] of [["Help me calm down", "STRESS"], ["Help me sleep", "SLEEP"], ["I need to focus", "FOCUS"]]) {
+      const result = await client.callTool({ name: "recommend_session", arguments: { user_context } });
+      assert.equal(result.isError, undefined);
+      assert.equal(result.structuredContent.primary_goal, goal);
+      assert.equal(result.structuredContent.title, recommendForChatGPT({ user_context }).title);
+      assert.equal(new URL(result.structuredContent.url).searchParams.get("utm_source"), "claude");
+      assert.equal(new URL(result.structuredContent.url).searchParams.get("utm_medium"), "connector");
+    }
   } finally {
     await client.close();
     server.closeAllConnections();

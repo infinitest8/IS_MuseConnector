@@ -1,9 +1,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
-import { recommendForChatGPT } from "./platformAdapters.js";
+import { recommendForChatGPT, recommendForClaude } from "./platformAdapters.js";
 
-export function createSessionMcpServer() {
+export function createSessionMcpServer(platform = "chatgpt") {
   const server = new McpServer({ name: "infinite-state", version: "0.2.0" }, {
     instructions: "Recommend only Infinite State's three selected free sessions. Send only a brief summary of the user's immediate meditation goal and relevant next activity. Never send conversation history, chat transcripts, memories, medical records, or unrelated personal information. Set desired_outcome only when explicitly stated by the user. Session durations are fixed; do not promise an exact requested length. Use concise reasons. No medical diagnosis, treatment, payments, or account actions."
   });
@@ -23,17 +23,17 @@ export function createSessionMcpServer() {
       requested_duration_minutes: z.number().nullable(), content_preference: z.string().nullable(),
       clarification_question: z.string().nullable()
     },
-    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    annotations: { title: "Recommend an Infinite State session", readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     _meta: { securitySchemes: [{ type: "noauth" }] }
   }, async (input) => {
-    const result = recommendForChatGPT(input);
+    const result = platform === "claude" ? recommendForClaude(input) : recommendForChatGPT(input);
     return { structuredContent: result, content: [{ type: "text", text: JSON.stringify(result) }] };
   });
   return server;
 }
 
-export async function handleMcpRequest(request, response, body) {
-  const server = createSessionMcpServer();
+export async function handleMcpRequest(request, response, body, platform = "chatgpt") {
+  const server = createSessionMcpServer(platform);
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true

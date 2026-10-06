@@ -9,9 +9,17 @@ export function recommendForMuse(text) {
 }
 
 export function recommendForChatGPT(input) {
+  return recommendForMcp(input, { utm_source: "chatgpt", utm_medium: "plugin" });
+}
+
+export function recommendForClaude(input) {
+  return recommendForMcp(input, { utm_source: "claude", utm_medium: "connector" });
+}
+
+function recommendForMcp(input, attribution) {
   const result = recommendMeditation(input, {
     catalog: INFINITE_STATE_MVP_SESSION_CATALOG,
-    attribution: { utm_source: "chatgpt", utm_medium: "plugin" }
+    attribution
   });
   return {
     primary_goal: result.primary_goal,
