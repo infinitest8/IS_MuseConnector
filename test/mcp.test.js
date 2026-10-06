@@ -85,6 +85,8 @@ test("Claude MCP route returns shared sessions with Claude attribution", async (
     await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${server.address().port}/mcp/claude`)));
     const { tools } = await client.listTools();
     assert.equal(tools[0].annotations.title, "Recommend an Infinite State session");
+    assert.match(tools[0].description, /Recommends one of three/);
+    assert.doesNotMatch(tools[0].description, /Do not send|Ask the returned|Never send/);
     for (const [user_context, goal] of [["Help me calm down", "STRESS"], ["Help me sleep", "SLEEP"], ["I need to focus", "FOCUS"]]) {
       const result = await client.callTool({ name: "recommend_session", arguments: { user_context } });
       assert.equal(result.isError, undefined);
