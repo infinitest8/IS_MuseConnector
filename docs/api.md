@@ -74,6 +74,14 @@ Render dashboard service logs are retained for seven days on the current Hobby
 workspace; separate provider-held metadata follows Render's policies.
 Support: hello@infinitestateapp.com.
 
+## Grok MCP
+
+Connect to https://infinite-state-muse.onrender.com/mcp/grok with Streamable HTTP.
+The recommendation tool and selected sessions are shared with Claude and ChatGPT.
+No authentication or API key is required. Links use utm_source=grok,
+utm_medium=connector, and utm_campaign=infinite_state_meditations.
+Marketplace availability requires separate review and client testing.
+
 ## Hosting
 
 Both endpoints use the existing paid Render web service (0.5 CPU, 512 MB).

@@ -77,12 +77,13 @@ test("MCP SDK client initializes, discovers and calls the recommendation tool", 
   }
 });
 
-test("Claude MCP route returns shared sessions with Claude attribution", async () => {
+for (const platform of ["claude", "grok"]) {
+test(`${platform} MCP route returns shared sessions with separate attribution`, async () => {
   const server = createRecommendationServer();
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const client = new Client({ name: "claude-review-tests", version: "1.0.0" });
   try {
-    await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${server.address().port}/mcp/claude`)));
+    await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${server.address().port}/mcp/${platform}`)));
     const { tools } = await client.listTools();
     assert.equal(tools[0].annotations.title, "Recommend an Infinite State session");
     assert.match(tools[0].description, /Recommends one of three/);
@@ -92,7 +93,7 @@ test("Claude MCP route returns shared sessions with Claude attribution", async (
       assert.equal(result.isError, undefined);
       assert.equal(result.structuredContent.primary_goal, goal);
       assert.equal(result.structuredContent.title, recommendForChatGPT({ user_context }).title);
-      assert.equal(new URL(result.structuredContent.url).searchParams.get("utm_source"), "claude");
+      assert.equal(new URL(result.structuredContent.url).searchParams.get("utm_source"), platform);
       assert.equal(new URL(result.structuredContent.url).searchParams.get("utm_medium"), "connector");
     }
   } finally {
@@ -101,3 +102,4 @@ test("Claude MCP route returns shared sessions with Claude attribution", async (
     await new Promise((resolve) => server.close(resolve));
   }
 });
+}

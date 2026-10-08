@@ -18,8 +18,9 @@ export function createRecommendationServer() {
   return createServer(async (request, response) => {
     try {
       const path = new URL(request.url, "http://localhost").pathname;
-      const isMcp = path === "/mcp" || path === "/mcp/claude";
-      const platform = path === "/mcp/claude" ? "claude" : "chatgpt";
+      const mcpPlatforms = { "/mcp": "chatgpt", "/mcp/claude": "claude", "/mcp/grok": "grok" };
+      const platform = mcpPlatforms[path];
+      const isMcp = Object.hasOwn(mcpPlatforms, path);
       if (path === "/.well-known/openai-apps-challenge" && request.method === "GET") {
         const token = process.env.OPENAI_APPS_CHALLENGE;
         if (!token) return send(response, 404, { error: "Verification token not configured" });

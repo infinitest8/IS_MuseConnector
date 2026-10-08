@@ -16,6 +16,10 @@ export function recommendForClaude(input) {
   return recommendForMcp(input, { utm_source: "claude", utm_medium: "connector" });
 }
 
+export function recommendForGrok(input) {
+  return recommendForMcp(input, { utm_source: "grok", utm_medium: "connector" });
+}
+
 function recommendForMcp(input, attribution) {
   const result = recommendMeditation(input, {
     catalog: INFINITE_STATE_MVP_SESSION_CATALOG,
